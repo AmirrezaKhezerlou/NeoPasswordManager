@@ -102,7 +102,9 @@ class SettingsBottomSheetCupertino extends StatelessWidget {
                         context,
                         CupertinoIcons.cloud_download,
                         'Download For Windows',
-                        () => openBazaarDetails(),
+                        ()async {
+                          await launchUrl(Uri.parse('https://github.com/AmirrezaKhezerlou/NeoPasswordManager/releases/'));
+                        },
                         primaryColor,
                       ),
                     if (Platform.isWindows)
@@ -110,7 +112,9 @@ class SettingsBottomSheetCupertino extends StatelessWidget {
                         context,
                         CupertinoIcons.cloud_download,
                         'Download Android',
-                        () => openBazaarDetails(),
+                        () async{
+                          await launchUrl(Uri.parse('https://cafebazaar.ir/app/com.neo.passwordmanager'));
+                        },
                         primaryColor,
                       ),
                     if (passcodeCtrl.hasPasscode)

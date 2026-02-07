@@ -246,78 +246,95 @@ class DashboardController extends GetxController {
 
         return StatefulBuilder(
           builder: (context, setState) {
-            return Container(
-              decoration: BoxDecoration(
-                color: surfaceColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              ),
-              child: SafeArea(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10, bottom: 6),
-                        child: Center(
-                          child: Container(
-                            width: 36,
-                            height: 5,
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFC7C7CC),
-                              borderRadius: BorderRadius.circular(2.5),
+            final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+            return AnimatedPadding(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOut,
+              padding: EdgeInsets.only(bottom: bottomInset),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10, bottom: 6),
+                          child: Center(
+                            child: Container(
+                              width: 36,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFC7C7CC),
+                                borderRadius: BorderRadius.circular(2.5),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Center(
-                              child: Text('Edit Entry', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-                            ),
-                            const SizedBox(height: 18),
-                            CupertinoTextField(
-                              controller: labelCtrl,
-                              placeholder: 'Label (Optional)',
-                              prefix: Icon(CupertinoIcons.tag, color: primaryColor, size: 20),
-                              placeholderStyle: TextStyle(color: onSurfaceColor.withOpacity(0.5)),
-                              decoration: BoxDecoration(color: surfaceColor, borderRadius: BorderRadius.circular(10)),
-                              style: TextStyle(color: onSurfaceColor),
-                            ),
-                            const SizedBox(height: 14),
-                            CupertinoTextField(
-                              controller: passCtrl,
-                              obscureText: !visible,
-                              placeholder: 'Password',
-                              prefix: Icon(CupertinoIcons.lock, color: primaryColor, size: 20),
-                              suffix: CupertinoButton(
-                                padding: EdgeInsets.zero,
-                                onPressed: () => setState(() => visible = !visible),
-                                child: Icon(
-                                  visible ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
-                                  color: primaryColor,
-                                  size: 20,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Center(
+                                child: Text(
+                                  'Edit Entry',
+                                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
                                 ),
                               ),
-                              placeholderStyle: TextStyle(color: onSurfaceColor.withOpacity(0.5)),
-                              decoration: BoxDecoration(color: surfaceColor, borderRadius: BorderRadius.circular(10)),
-                              style: TextStyle(color: onSurfaceColor),
-                            ),
-                            const SizedBox(height: 22),
-                            SizedBox(
-                              width: double.infinity,
-                              child: CupertinoButton.filled(
-                                onPressed: save,
-                                child: const Text('Update', style: TextStyle(fontSize: 17)),
+                              const SizedBox(height: 18),
+                              CupertinoTextField(
+                                controller: labelCtrl,
+                                placeholder: 'Label (Optional)',
+                                prefix: Icon(CupertinoIcons.tag, color: primaryColor, size: 20),
+                                placeholderStyle: TextStyle(color: onSurfaceColor.withOpacity(0.5)),
+                                decoration: BoxDecoration(
+                                  color: surfaceColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                style: TextStyle(color: onSurfaceColor),
                               ),
-                            ),
-                            const SizedBox(height: 16),
-                          ],
+                              const SizedBox(height: 14),
+                              CupertinoTextField(
+                                controller: passCtrl,
+                                obscureText: !visible,
+                                placeholder: 'Password',
+                                prefix: Icon(CupertinoIcons.lock, color: primaryColor, size: 20),
+                                suffix: CupertinoButton(
+                                  padding: EdgeInsets.zero,
+                                  onPressed: () => setState(() => visible = !visible),
+                                  child: Icon(
+                                    visible ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
+                                    color: primaryColor,
+                                    size: 20,
+                                  ),
+                                ),
+                                placeholderStyle: TextStyle(color: onSurfaceColor.withOpacity(0.5)),
+                                decoration: BoxDecoration(
+                                  color: surfaceColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                style: TextStyle(color: onSurfaceColor),
+                              ),
+                              const SizedBox(height: 22),
+                              SizedBox(
+                                width: double.infinity,
+                                child: CupertinoButton.filled(
+                                  onPressed: save,
+                                  child: const Text('Update', style: TextStyle(fontSize: 17)),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -327,6 +344,7 @@ class DashboardController extends GetxController {
       },
     );
   }
+
 
   void showDeleteConfirmationSheet(BuildContext context, PasswordModel model) {
     final label = model.label ?? 'this entry';

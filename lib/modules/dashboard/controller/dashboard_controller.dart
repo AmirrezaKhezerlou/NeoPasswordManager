@@ -31,7 +31,7 @@ class DashboardController extends GetxController {
   final TextEditingController searchController = TextEditingController();
   final _secureStorage = const FlutterSecureStorage();
   static const _magicHeader = 'NEOPASSv1';
-  static const _keyName = 'backup_encryption_key';
+  static const _keyName = '-------------';
 
   @override
   void onInit() {

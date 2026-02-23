@@ -2,6 +2,8 @@ import 'dart:io' show Platform, exit;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:password_manager/utils/translate/app_translations.dart';
+import 'package:password_manager/utils/translate/locale_controller.dart';
 import 'package:text_selection_intent/text_selection_intent.dart';
 import 'package:window_manager/window_manager.dart';
 import 'modules/passcode/controller/passcode_controller.dart';
@@ -27,13 +29,16 @@ void main() async {
     });
   }
 
-  final securityService = AppSecurityService();
-  securityService.initialize();
+  final localeController = Get.put(LocaleController());
+  await localeController.init();
 
   Get.put(ThemeController());
   Get.put(PasscodeController());
   Get.put(SharedTextHandlerService());
+
   if (Platform.isAndroid) {
+    final securityService = AppSecurityService();
+    securityService.initialize();
     TextSelectionIntent.listen((text) {
       if (text.isNotEmpty && !Get.isRegistered<SharedText>()) {
         Get.put(SharedText(text));
@@ -42,6 +47,39 @@ void main() async {
   }
 
   runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<ThemeController>(
+      builder: (themeController) {
+        return Obx(() {
+          final localeCtrl = Get.find<LocaleController>();
+          final isDark = themeController.themeMode.value == ThemeMode.dark;
+
+          return DefaultTextStyle(
+            style: TextStyle(fontFamily: localeCtrl.fontFamily),
+            child: GetCupertinoApp(
+              debugShowCheckedModeBanner: false,
+              title: 'NeoPass',
+              translations: AppTranslations(),
+              locale: localeCtrl.currentLocale.value,
+              fallbackLocale: const Locale('fa', 'IR'),
+              theme: isDark
+                  ? const CupertinoThemeData(brightness: Brightness.dark)
+                  : const CupertinoThemeData(brightness: Brightness.light),
+              home: Platform.isWindows
+                  ? const WindowsFrameWrapper(child: PasscodeGateKeeper())
+                  : const PasscodeGateKeeper(),
+            ),
+          );
+        });
+      },
+    );
+  }
 }
 
 class SharedText extends GetxService {
@@ -59,28 +97,6 @@ class SharedTextHandlerService extends GetxService {
     final text = Get.find<SharedText>().text;
     Get.delete<SharedText>();
     return text;
-  }
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return GetBuilder<ThemeController>(
-      builder: (themeController) {
-        return GetCupertinoApp(
-          debugShowCheckedModeBanner: false,
-          title: 'NeoPass',
-          theme: themeController.themeMode.value == ThemeMode.dark
-              ? const CupertinoThemeData(brightness: Brightness.dark)
-              : const CupertinoThemeData(brightness: Brightness.light),
-          home: Platform.isWindows
-              ? const WindowsFrameWrapper(child: PasscodeGateKeeper())
-              : const PasscodeGateKeeper(),
-        );
-      },
-    );
   }
 }
 
@@ -119,15 +135,15 @@ class WindowsFrameWrapper extends StatelessWidget {
                       constraints: const BoxConstraints(),
                       splashRadius: 20,
                       onPressed: () => Get.defaultDialog(
-                        title: 'Exit',
-                        content: const Text('Are you sure you want to exit?'),
+                        title: 'exit_title'.tr,
+                        content: Text('exit_message'.tr),
                         confirm: CupertinoDialogAction(
                           onPressed: () => exit(0),
-                          child: const Text('Yes'),
+                          child: Text('yes'.tr),
                         ),
                         cancel: CupertinoDialogAction(
                           onPressed: Get.back,
-                          child: const Text('No'),
+                          child: Text('no'.tr),
                         ),
                       ),
                       icon: Icon(CupertinoIcons.xmark, size: 16, color: iconColor),

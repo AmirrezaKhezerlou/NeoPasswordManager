@@ -22,45 +22,31 @@ class AllPasswordsPage extends StatelessWidget {
     return CupertinoPageScaffold(
       backgroundColor: backgroundColor,
       navigationBar: CupertinoNavigationBar(
-        backgroundColor: backgroundColor,
-        middle: const Text('All Passwords'),
-        previousPageTitle: '',
+        backgroundColor: backgroundColor.withOpacity(0.8),
+        border: null,
+        middle: Text(
+          'all_passwords'.tr,
+          style: TextStyle(color: onSurfaceColor, fontWeight: FontWeight.w700),
+        ),
         trailing: Obx(() {
           if (controller.isSelectionMode.value) {
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (controller.selectedPasswords.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: Text('${controller.selectedPasswords.length}', style: TextStyle(color: errorColor)),
-                  ),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   onPressed: controller.selectedPasswords.isNotEmpty ? controller.showDeleteConfirmation : null,
-                  child: Icon(CupertinoIcons.trash, color: controller.selectedPasswords.isNotEmpty ? errorColor : onSurfaceColor.withOpacity(0.3), size: 24),
-                ),
-                CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () {
-                    if (controller.selectedPasswords.length == dashboardController.passwords.length) {
-                      controller.deselectAll();
-                    } else {
-                      controller.selectAll();
-                    }
-                  },
                   child: Icon(
-                    controller.selectedPasswords.length == dashboardController.passwords.length
-                        ? CupertinoIcons.check_mark_circled_solid
-                        : CupertinoIcons.circle,
-                    color: primaryColor,
-                    size: 24,
+                    CupertinoIcons.trash_fill,
+                    color: controller.selectedPasswords.isNotEmpty ? errorColor : onSurfaceColor.withOpacity(0.2),
+                    size: 22,
                   ),
                 ),
+                const SizedBox(width: 8),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   onPressed: controller.exitSelectionMode,
-                  child: const Icon(CupertinoIcons.clear, size: 24),
+                  child: Text('done'.tr, style: TextStyle(color: primaryColor, fontWeight: FontWeight.w600)),
                 ),
               ],
             );
@@ -68,7 +54,7 @@ class AllPasswordsPage extends StatelessWidget {
             return CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: controller.toggleSelectionMode,
-              child: Icon(CupertinoIcons.pencil, color: primaryColor, size: 24),
+              child: Text('edit'.tr, style: TextStyle(color: primaryColor)),
             );
           }
         }),
@@ -77,45 +63,71 @@ class AllPasswordsPage extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
-              child: CupertinoTextField(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: CupertinoSearchTextField(
                 controller: controller.searchController,
                 onChanged: controller.filterPasswords,
-                placeholder: 'Search passwords',
-                prefix: Icon(CupertinoIcons.search, color: primaryColor),
-                placeholderStyle: TextStyle(color: onSurfaceColor.withOpacity(0.5)),
-                decoration: BoxDecoration(
-                  color: surfaceColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                style: TextStyle(color: onSurfaceColor),
+                placeholder: 'search_passwords'.tr,
+                backgroundColor: surfaceColor,
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
+            if (controller.isSelectionMode.value)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${controller.selectedPasswords.length} ' + 'selected'.tr,
+                      style: TextStyle(color: onSurfaceColor.withOpacity(0.6), fontWeight: FontWeight.w600),
+                    ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      minSize: 0,
+                      onPressed: () {
+                        if (controller.selectedPasswords.length == dashboardController.passwords.length) {
+                          controller.deselectAll();
+                        } else {
+                          controller.selectAll();
+                        }
+                      },
+                      child: Text(
+                        controller.selectedPasswords.length == dashboardController.passwords.length
+                            ? 'deselect_all'.tr
+                            : 'select_all'.tr,
+                        style: TextStyle(fontSize: 14, color: primaryColor),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             Expanded(
               child: Obx(() {
-                final list = dashboardController.filteredPasswords;
+                final list = dashboardController.filteredPasswords.reversed.toList();
                 if (list.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(CupertinoIcons.lock_open, size: 60, color: onSurfaceColor.withOpacity(0.3)),
+                        Icon(CupertinoIcons.search, size: 60, color: onSurfaceColor.withOpacity(0.1)),
                         const SizedBox(height: 16),
-                        Text('No passwords found', style: TextStyle(fontSize: 17, color: onSurfaceColor.withOpacity(0.5))),
+                        Text(
+                          'no_passwords_found'.tr,
+                          style: TextStyle(fontSize: 17, color: onSurfaceColor.withOpacity(0.4)),
+                        ),
                       ],
                     ),
                   );
                 }
                 return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  physics: const BouncingScrollPhysics(),
                   itemCount: list.length,
                   itemBuilder: (context, index) {
-                    final password = list.reversed.toList()[index];
-                    final isObscured = dashboardController.obscurePassword[password.id] ?? true;
-                    final isSelected = controller.selectedPasswords.contains(password);
-                    final isSelectionMode = controller.isSelectionMode.value;
-
+                    final password = list[index];
                     return PasswordListItemAllCupertino(
-                      key: Key('item_${password.id}_$isSelectionMode'),
+                      key: ValueKey('all_${password.id}'),
                       password: password,
                       dashboardController: dashboardController,
                       allPasswordsController: controller,
@@ -134,6 +146,7 @@ class AllPasswordsPage extends StatelessWidget {
     );
   }
 }
+
 class PasswordListItemAllCupertino extends StatelessWidget {
   final PasswordModel password;
   final DashboardController dashboardController;
@@ -144,7 +157,7 @@ class PasswordListItemAllCupertino extends StatelessWidget {
   final Color errorColor;
 
   const PasswordListItemAllCupertino({
-    Key? key,
+    super.key,
     required this.password,
     required this.dashboardController,
     required this.allPasswordsController,
@@ -152,7 +165,7 @@ class PasswordListItemAllCupertino extends StatelessWidget {
     required this.onSurfaceColor,
     required this.primaryColor,
     required this.errorColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -161,113 +174,110 @@ class PasswordListItemAllCupertino extends StatelessWidget {
       final isSelected = allPasswordsController.selectedPasswords.contains(password);
       final isSelectionMode = allPasswordsController.isSelectionMode.value;
       final isWeak = dashboardController.weakPasswords.any((p) => p.id == password.id);
+      final isRtl = Directionality.of(context) == TextDirection.rtl;
 
-      return GestureDetector(
-        onTap: isSelectionMode
-            ? () => allPasswordsController.toggleSelectPassword(password)
-            : null,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          decoration: BoxDecoration(
-            color: isSelected ? primaryColor.withOpacity(0.1) : surfaceColor,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected ? primaryColor : (isWeak ? errorColor.withOpacity(0.3) : Colors.transparent),
-              width: isSelected ? 2 : (isWeak ? 1.5 : 0),
+      return AnimatedPadding(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.only(bottom: 10),
+        child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: isSelectionMode
+              ? () => allPasswordsController.toggleSelectPassword(password)
+              : () => allPasswordsController.showPasswordItemSettings(context, password),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: isSelected ? primaryColor.withOpacity(0.08) : surfaceColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isSelected
+                    ? primaryColor
+                    : (isWeak ? errorColor.withOpacity(0.3) : onSurfaceColor.withOpacity(0.04)),
+                width: isSelected ? 2 : 1,
+              ),
             ),
-          ),
-          child: Row(
-            children: [
-              if (isSelectionMode)
-                Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: Icon(
-                    isSelected ? CupertinoIcons.check_mark_circled_solid : CupertinoIcons.circle,
-                    color: isSelected ? primaryColor : onSurfaceColor.withOpacity(0.3),
-                    size: 24,
+            child: Row(
+              children: [
+                if (isSelectionMode)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Icon(
+                      isSelected ? CupertinoIcons.check_mark_circled_solid : CupertinoIcons.circle,
+                      color: isSelected ? primaryColor : onSurfaceColor.withOpacity(0.2),
+                      size: 24,
+                    ),
+                  ),
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: isWeak ? errorColor.withOpacity(0.1) : primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      isWeak ? CupertinoIcons.exclamationmark_shield_fill : CupertinoIcons.shield_fill,
+                      color: isWeak ? errorColor : primaryColor,
+                      size: 24,
+                    ),
                   ),
                 ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(CupertinoIcons.lock, color: primaryColor, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            password.label ?? 'No label',
-                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        password.label ?? 'no_label'.tr,
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: isSelected ? primaryColor : onSurfaceColor
                         ),
-                        if (isWeak)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: errorColor.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              'Weak',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: errorColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      isObscured ? '••••••••' : password.password,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isObscured ? onSurfaceColor.withOpacity(0.5) : primaryColor,
-                        fontWeight: isObscured ? FontWeight.normal : FontWeight.w600,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              if (!isSelectionMode)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () {
-                        dashboardController.copyToClipboard(context, password.password);
-                      },
-                      child: Icon(CupertinoIcons.doc_on_doc, color: onSurfaceColor.withOpacity(0.5), size: 20),
-                    ),
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () {
-                        dashboardController.toggleObscure(password.id);
-                      },
-                      child: Icon(
-                        isObscured ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
-                        color: onSurfaceColor.withOpacity(0.5),
-                        size: 20,
+                      const SizedBox(height: 4),
+                      Text(
+                        isObscured ? '••••••••' : password.password,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: isObscured ? null : 'Courier',
+                          color: isObscured ? onSurfaceColor.withOpacity(0.4) : primaryColor,
+                          fontWeight: isObscured ? FontWeight.bold : FontWeight.w600,
+                          letterSpacing: isObscured ? 1.2 : 0,
+                        ),
+                        maxLines: 1,
                       ),
-                    ),
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () {
-                        allPasswordsController.showPasswordItemSettings(context, password);
-                      },
-                      child: Icon(CupertinoIcons.ellipsis, color: onSurfaceColor.withOpacity(0.5), size: 20),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-            ],
+                if (!isSelectionMode)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CupertinoButton(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        minSize: 36,
+                        onPressed: () => dashboardController.toggleObscure(password.id),
+                        child: Icon(
+                          isObscured ? CupertinoIcons.eye_fill : CupertinoIcons.eye_slash_fill,
+                          color: onSurfaceColor.withOpacity(0.3),
+                          size: 20,
+                        ),
+                      ),
+                      Transform.flip(
+                        flipX: isRtl,
+                        child: Icon(
+                            CupertinoIcons.chevron_right,
+                            size: 14,
+                            color: onSurfaceColor.withOpacity(0.2)
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
           ),
         ),
       );

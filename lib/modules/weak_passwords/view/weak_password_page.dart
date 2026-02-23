@@ -1,8 +1,7 @@
-// weak_passwords_page.dart
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:password_manager/modules/dashboard/controller/dashboard_controller.dart';
-
 import '../../../services/storage_service/storage_manager.dart';
 import '../controller/weak_password_controller.dart';
 
@@ -17,85 +16,109 @@ class WeakPasswordsPage extends StatelessWidget {
     final backgroundColor = isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7);
     final surfaceColor = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFFFFFFF);
     final onSurfaceColor = isDark ? const Color(0xFFE5E5EA) : const Color(0xFF1C1C1E);
+    final primaryColor = isDark ? const Color(0xFF0A84FF) : const Color(0xFF007AFF);
     final errorColor = const Color(0xFFFF3B30);
-    final warningColor = const Color(0xFFFF9500);
 
     return CupertinoPageScaffold(
       backgroundColor: backgroundColor,
       navigationBar: CupertinoNavigationBar(
-        backgroundColor: backgroundColor,
-        middle: const Text('Weak Passwords'),
-        previousPageTitle: '',
-        trailing: null,
+        backgroundColor: backgroundColor.withOpacity(0.8),
+        border: null,
+        middle: Text(
+          'weak_passwords_title'.tr,
+          style: TextStyle(color: onSurfaceColor, fontWeight: FontWeight.w700),
+        ),
       ),
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 400),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: errorColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  color: errorColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: errorColor.withOpacity(0.2)),
                 ),
                 child: Row(
                   children: [
-                    Icon(CupertinoIcons.exclamationmark_triangle, color: errorColor, size: 24),
-                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: errorColor.withOpacity(0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(CupertinoIcons.shield_slash_fill, color: errorColor, size: 20),
+                    ),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Text(
-                        'These passwords are weak and should be updated for better security.',
-                        style: TextStyle(fontSize: 14, color: errorColor),
+                        'weak_passwords_warning'.tr,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: errorColor,
+                          fontWeight: FontWeight.w500,
+                          height: 1.4,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: Obx(
-                      () => controller.weakPasswords.isEmpty
-                      ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          CupertinoIcons.check_mark_circled,
-                          size: 60,
-                          color: const Color(0xFF007AFF).withOpacity(0.3),
+            ),
+            Expanded(
+              child: Obx(
+                    () => controller.weakPasswords.isEmpty
+                    ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        CupertinoIcons.checkmark_shield_fill,
+                        size: 70,
+                        color: CupertinoColors.systemGreen.withOpacity(0.2),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'no_weak_passwords'.tr,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: onSurfaceColor.withOpacity(0.5),
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No weak passwords found',
-                          style: TextStyle(fontSize: 17, color: onSurfaceColor.withOpacity(0.5)),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'all_passwords_strong'.tr,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: onSurfaceColor.withOpacity(0.3),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Great! All your passwords are strong.',
-                          style: TextStyle(fontSize: 15, color: onSurfaceColor.withOpacity(0.3)),
-                        ),
-                      ],
-                    ),
-                  )
-                      : ListView.builder(
-                    itemCount: controller.weakPasswords.length,
-                    itemBuilder: (context, index) {
-                      final password = controller.weakPasswords[index];
-                      return WeakPasswordListItemCupertino(
-                        password: password,
-                        controller: controller,
-                        surfaceColor: surfaceColor,
-                        onSurfaceColor: onSurfaceColor,
-                        errorColor: errorColor,
-                        warningColor: warningColor,
-                      );
-                    },
+                      ),
+                    ],
                   ),
+                )
+                    : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: controller.weakPasswords.length,
+                  itemBuilder: (context, index) {
+                    final password = controller.weakPasswords[index];
+                    return WeakPasswordListItemCupertino(
+                      password: password,
+                      controller: controller,
+                      surfaceColor: surfaceColor,
+                      onSurfaceColor: onSurfaceColor,
+                      primaryColor: primaryColor,
+                      errorColor: errorColor,
+                    );
+                  },
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -107,108 +130,144 @@ class WeakPasswordListItemCupertino extends StatelessWidget {
   final WeakPasswordsController controller;
   final Color surfaceColor;
   final Color onSurfaceColor;
+  final Color primaryColor;
   final Color errorColor;
-  final Color warningColor;
 
   const WeakPasswordListItemCupertino({
-    Key? key,
+    super.key,
     required this.password,
     required this.controller,
     required this.surfaceColor,
     required this.onSurfaceColor,
+    required this.primaryColor,
     required this.errorColor,
-    required this.warningColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final passwordStrength = _calculatePasswordStrength(password.password);
-    final strengthColor = _getStrengthColor(passwordStrength);
-    final strengthText = _getStrengthText(passwordStrength);
+    final strength = _calculateStrength(password.password);
+    final strengthColor = _getStrengthColor(strength);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: errorColor.withOpacity(0.3), width: 1.5),
-      ),
-      child: CupertinoListTile(
-        leading: Icon(CupertinoIcons.lock, color: errorColor, size: 24),
-        title: Text(
-          password.label ?? 'No label',
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              password.password,
-              style: TextStyle(fontSize: 13, color: errorColor, fontWeight: FontWeight.w600),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Strength: $strengthText',
-                  style: TextStyle(fontSize: 11, color: strengthColor, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: List.generate(5, (index) {
-                    final isActive = index < passwordStrength;
-                    return Expanded(
-                      child: Container(
-                        height: 4,
-                        margin: const EdgeInsets.only(right: 2),
-                        decoration: BoxDecoration(
-                          color: isActive ? strengthColor : onSurfaceColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(2),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: () => controller.showEditSheet(context, password),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: surfaceColor,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: errorColor.withOpacity(0.2), width: 1),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: errorColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Icon(CupertinoIcons.exclamationmark_shield_fill, color: errorColor, size: 22),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          password.label ?? 'no_label'.tr,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: onSurfaceColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: 2),
+                        Text(
+                          password.password,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: errorColor.withOpacity(0.8),
+                            fontFamily: 'Courier',
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Transform.flip(
+                    flipX: isRtl,
+                    child: Icon(
+                      CupertinoIcons.chevron_right,
+                      size: 14,
+                      color: onSurfaceColor.withOpacity(0.2),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(2),
+                      child: LinearProgressIndicator(
+                        value: strength / 5,
+                        backgroundColor: onSurfaceColor.withOpacity(0.05),
+                        valueColor: AlwaysStoppedAnimation<Color>(strengthColor),
+                        minHeight: 4,
                       ),
-                    );
-                  }),
-                ),
-              ],
-            ),
-          ],
-        ),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () => controller.showEditSheet(context, password),
-          child: Icon(CupertinoIcons.pencil, color: onSurfaceColor.withOpacity(0.6), size: 22),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    _getStrengthText(strength).tr,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: strengthColor,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Color _getStrengthColor(int strength) {
-    if (strength <= 2) return const Color(0xFFFF3B30); // red
-    if (strength <= 3) return const Color(0xFFFF9500); // orange
-    return const Color(0xFF30D158); // green
+    if (strength <= 2) return const Color(0xFFFF3B30);
+    if (strength <= 3) return const Color(0xFFFF9500);
+    return const Color(0xFF34C759);
   }
 
   String _getStrengthText(int strength) {
-    if (strength <= 2) return 'Very Weak';
-    if (strength <= 3) return 'Weak';
-    return 'Moderate';
+    if (strength <= 1) return 'strength_very_weak';
+    if (strength <= 2) return 'strength_weak';
+    if (strength <= 3) return 'strength_medium';
+    return 'strength_moderate';
   }
 
-  int _calculatePasswordStrength(String password) {
+  int _calculateStrength(String password) {
     int score = 0;
     if (password.length >= 8) score++;
     if (password.length >= 12) score++;
-    if (password.contains(RegExp(r'[A-Z]'))) score++;
-    if (password.contains(RegExp(r'[a-z]'))) score++;
-    if (password.contains(RegExp(r'[0-9]'))) score++;
-    if (password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'))) score++;
-    return (score / 2).ceil().clamp(1, 5);
+    if (RegExp(r'[A-Z]').hasMatch(password)) score++;
+    if (RegExp(r'[0-9]').hasMatch(password)) score++;
+    if (RegExp(r'[!@#\$%^&*()]').hasMatch(password)) score++;
+    return score.clamp(1, 5);
   }
 }

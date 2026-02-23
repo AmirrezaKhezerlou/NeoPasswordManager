@@ -7,7 +7,7 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// تعریف متغیرها بلافاصله بعد از پلاگین‌ها
+
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
@@ -36,11 +36,11 @@ android {
         applicationId = "com.neo.passwordmanager"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = 1
-        versionName = "1.1.0"
+        versionCode = 2
+        versionName = "1.1.1"
     }
 
-    // این بلاک را دقیقاً به این شکل تعریف کن
+
     signingConfigs {
         create("release") {
             keyAlias = keystoreProperties.getProperty("keyAlias")

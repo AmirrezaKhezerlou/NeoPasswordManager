@@ -64,14 +64,14 @@ class PasscodeController extends GetxController {
       if (tempPasscode.value.isEmpty) {
         tempPasscode.value = input;
         clearInput();
-        statusMessage.value = 'Re-enter your passcode';
+        statusMessage.value = 're_enter_passcode'.tr;
         return;
       }
 
       if (input != tempPasscode.value) {
         tempPasscode.value = '';
         clearInput();
-        _error('Passcodes do not match');
+        _error('passcodes_not_match'.tr);
         return;
       }
 
@@ -96,7 +96,7 @@ class PasscodeController extends GetxController {
       Get.offAll(() => const DashboardPage());
     } else {
       clearInput();
-      _error('Incorrect passcode');
+      _error('incorrect_passcode'.tr);
     }
   }
 
@@ -113,7 +113,7 @@ class PasscodeController extends GetxController {
     if (!biometricEnabled.value) return false;
     try {
       final success = await auth.authenticate(
-        localizedReason: 'Unlock with fingerprint',
+        localizedReason: 'unlock_with_fingerprint'.tr,
         biometricOnly: true,
       );
       if (success) {
@@ -147,12 +147,12 @@ class PasscodeController extends GetxController {
     Get.dialog(
       barrierDismissible: false,
       CupertinoAlertDialog(
-        title: const Text('Oops'),
+        title: Text('oops'.tr),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
             onPressed: Get.back,
-            child: const Text('Try Again'),
+            child: Text('try_again'.tr),
           ),
         ],
       ),
